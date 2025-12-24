@@ -1,0 +1,125 @@
+<?php 
+
+namespace App\Repositories;
+
+use App\Interfaces\SocialAssistanceRepositoryInterface;
+use App\Models\SocialAssistance;
+use Exception;
+use Illuminate\Support\Facades\DB;
+
+class SocialAssistanceRepository implements SocialAssistanceRepositoryInterface
+{
+    public function getAll(?string $search = null, ?int $limit = null, bool $execute = true)
+    {
+       // Mulai query Eloquent untuk model SocialAssistance
+        $query = SocialAssistance::query()
+            // Tambahkan kondisi search hanya jika parameter $search tidak null
+            // Fitur 'search()' biasanya berasal dari local scope: scopeSearch() di model
+            ->when($search, fn($q) => $q->search($search))
+
+            // Urutkan data berdasarkan created_at (desc)
+            // Sama dengan orderBy('created_at', 'desc')
+            ->latest();
+
+        // Jika limit diberikan dan nilainya lebih dari 0, batasi jumlah data
+        if (!is_null($limit) && $limit > 0) {
+            $query->limit($limit);
+        }
+
+        // Jika execute = true, langsung eksekusi query dan ambil hasilnya
+        // Jika false, kembalikan objek Query Builder untuk fleksibilitas chaining
+        return $execute ? $query->get() : $query;
+    }
+
+    public function getAllPaginated(?string $search, ?int $rowPerPage)
+    {
+        $query = $this->getAll(
+            $search,
+            $rowPerPage,
+            false
+        );  
+        return $query->paginate($rowPerPage);
+    }
+
+    public function getById(string $id)
+    {
+        $query = SocialAssistance::where('id', $id);
+
+        return $query->first();
+    }
+
+    public function create(array $data)
+    {
+         DB::beginTransaction();
+
+        try{
+
+            $socialAssistance = new SocialAssistance;
+            $socialAssistance->thumbnail = $data['thumbnail']->store('assets/social-assistance', 'public');
+            $socialAssistance->name = $data['name'];
+            $socialAssistance->category = $data['category'];
+            $socialAssistance->amount = $data['amount'];
+            $socialAssistance->provider = $data['provider'];
+            $socialAssistance->description = $data['description'];
+            $socialAssistance->is_available = $data['is_available'];
+            $socialAssistance->save();
+
+            DB::commit();
+
+            return $socialAssistance;
+
+        } catch (\Exception $e){
+            DB::rollBack();
+
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function update(string $id, array $data)
+    {
+        DB::beginTransaction();
+
+        try{
+
+            $socialAssistance = SocialAssistance::find($id);
+
+            if(isset($data['thumbnail'])){
+                $socialAssistance->thumbnail = $data['thumbnail']->store('assets/social-assistance', 'public');
+            }
+            $socialAssistance->name = $data['name'];
+            $socialAssistance->category = $data['category'];
+            $socialAssistance->amount = $data['amount'];
+            $socialAssistance->provider = $data['provider'];
+            $socialAssistance->description = $data['description'];
+            $socialAssistance->is_available = $data['is_available'];
+            $socialAssistance->save();
+
+            DB::commit();
+
+            return $socialAssistance;
+
+        } catch (\Exception $e){
+            DB::rollBack();
+
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function delete($id)
+    {
+        DB::beginTransaction();
+
+        try{
+            $socialAssistance = SocialAssistance::find($id);
+            $socialAssistance->delete();
+
+            DB::commit();
+
+            return $socialAssistance;
+        } catch (\Exception $e){
+             DB::rollBack();
+
+            throw new Exception($e->getMessage());
+        }
+    }
+}
