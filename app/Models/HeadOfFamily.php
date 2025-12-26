@@ -44,14 +44,31 @@ class HeadOfFamily extends Model
         return $this->hasMany(EventParticipant::class);
     }
 
+    // public function scopeSearch($query, $search)
+    // {
+    //     // cari berdasarkan name, email dari user yg dimili model headOfFamily
+    //     return $query->whereHas('user', function($query) use ($search){
+    //         $query->where('name', 'like', '%'. $search. '%')
+    //         ->orWhere('email', 'like', '%'. $search. '%');
+    //     })->orWhere('phone_number', 'like', '%'. $search. '%')
+    //         ->orWhere('identity_number', 'like', '%'. $search. '%');
+    // }
+
     public function scopeSearch($query, $search)
     {
-        // cari berdasarkan name, email dari user yg dimili model headOfFamily
-        return $query->whereHas('user', function($query) use ($search){
-            $query->where('name', 'like', '%'. $search. '%')
-            ->orWhere('email', 'like', '%'. $search. '%');
-        })->orWhere('phone_number', 'like', '%'. $search. '%')
-            ->orWhere('identity_number', 'like', '%'. $search. '%');
+        // if (blank($search)) {
+        //     return $query;
+        // }
+
+        return $query->where(function ($q) use ($search) {
+            $q->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->orWhere('phone_number', 'like', "%{$search}%")
+            ->orWhere('identity_number', 'like', "%{$search}%");
+        });
     }
+
 
 }

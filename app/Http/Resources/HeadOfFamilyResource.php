@@ -14,11 +14,15 @@ class HeadOfFamilyResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // detail headoffamily
         // data yg dipilih dari relasi model headOfFamily dan user utk ditampilkan
         // belongsTo = 'user' => new UserResource($this->user),
         return [
             'id' => $this->id,
-            'user' => new UserResource($this->user),
+            // 'user' => new UserResource($this->user),
+            'user' => new UserResource(
+                $this->whenLoaded('user')
+            ),
             'profile_picture' => asset('storage/'. $this->profile_picture),
             'identity_number' => $this->identity_number,
             'gender' => $this->gender,
@@ -26,7 +30,8 @@ class HeadOfFamilyResource extends JsonResource
             'phone_number' => $this->phone_number,
             'occupation' => $this->occupation,
             'marital_status' => $this->marital_status,
-            'family_members' => FamilyMemberResource::collection($this->familyMembers)
+            // 'family_members' => FamilyMemberResource::collection($this->familyMembers)
+            'family_members' => FamilyMemberResource::collection($this->whenLoaded('familyMembers'))
         ];
     }
 }

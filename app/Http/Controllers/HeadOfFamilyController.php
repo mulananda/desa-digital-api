@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\HeadOfFamilyStoreRequest;
 use App\Http\Requests\HeadOfFamilyUpdateRequest;
+use App\Http\Resources\HeadOfFamilyListResource;
 use App\Http\Resources\HeadOfFamilyResource;
 use App\Http\Resources\PaginateResource;
 use App\Interfaces\HeadOfFamilyRepositoryInterface;
@@ -35,40 +36,106 @@ class HeadOfFamilyController extends Controller implements HasMiddleware
     /**
      * Display a listing of the resource.
      */
+    // public function index(Request $request)
+    // {
+    //     try{
+    //         $headOfFamily = $this->headOfFamilyRepository->getAll(
+    //             $request->search,
+    //             $request->limit,
+    //             true
+    //         );
+
+    //         return ResponseHelper::jsonResponse(true, 'Data Kepala Keluarga Berhasil Diambil', HeadOfFamilyResource::collection($headOfFamily), 200);
+
+    //     } catch (\Exception $e){
+    //         return ResponseHelper::jsonResponse(false, 'Data Kepala Keluarga Gagal Diambil', null, 500);
+    //     }
+    // }
+
+    // public function getAllPaginated(Request $request)
+    // {
+    //     $request = $request->validate([
+    //         'search' => 'nullable|string',
+    //         'row_per_page' => 'required|integer'
+    //     ]);
+
+    //     try{
+    //         $headOfFamily = $this->headOfFamilyRepository->getAllPaginated(
+    //             $request['search'] ?? null,
+    //             $request['row_per_page']
+    //         );
+
+    //         return ResponseHelper::jsonResponse(true, 'Data Kepala Keluarga Berhasil Diambil', PaginateResource::make($headOfFamily, HeadOfFamilyResource::class), 200);
+
+    //     } catch (\Exception $e){
+
+    //         return ResponseHelper::jsonResponse(false, 'Data Kepala Keluarga Gagal Diambil', null, 500);
+    //     }
+    // }
+
+    /**
+     * Display a listing of the resource.
+     * GET /api/head-of-families
+     */
     public function index(Request $request)
     {
-        try{
-            $headOfFamily = $this->headOfFamilyRepository->getAll(
-                $request->search,
-                $request->limit,
-                true
+        try {
+            $headOfFamilies = $this->headOfFamilyRepository->getAll(
+                search: $request->search,
+                limit: $request->limit,
+                with: ['user'], // Eager load untuk prevent N+1
+                execute: true
             );
 
-            return ResponseHelper::jsonResponse(true, 'Data Kepala Keluarga Berhasil Diambil', HeadOfFamilyResource::collection($headOfFamily), 200);
+            return ResponseHelper::jsonResponse(
+                true, 
+                'Data Kepala Keluarga Berhasil Diambil', 
+                HeadOfFamilyResource::collection($headOfFamilies), 
+                200
+            );
 
-        } catch (\Exception $e){
-            return ResponseHelper::jsonResponse(false, 'Data Kepala Keluarga Gagal Diambil', null, 500);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(
+                false, 
+                'Data Kepala Keluarga Gagal Diambil', 
+                null, 
+                500
+            );
         }
     }
 
+    /**
+     * Get paginated list of head of families
+     * GET /api/head-of-families/paginated
+     */
     public function getAllPaginated(Request $request)
     {
-        $request = $request->validate([
-            'search' => 'nullable|string',
-            'row_per_page' => 'required|integer'
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'row_per_page' => 'required|integer|min:1|max:100'
         ]);
 
-        try{
-            $headOfFamily = $this->headOfFamilyRepository->getAllPaginated(
-                $request['search'] ?? null,
-                $request['row_per_page']
+        try {
+            $headOfFamilies = $this->headOfFamilyRepository->getAllPaginated(
+                search: $validated['search'] ?? null,
+                rowPerPage: $validated['row_per_page'],
+                with: ['user'] // Eager load untuk prevent N+1
             );
 
-            return ResponseHelper::jsonResponse(true, 'Data Kepala Keluarga Berhasil Diambil', PaginateResource::make($headOfFamily, HeadOfFamilyResource::class), 200);
+            return ResponseHelper::jsonResponse(
+                true, 
+                'Data Kepala Keluarga Berhasil Diambil', 
+                PaginateResource::make($headOfFamilies, HeadOfFamilyResource::class), 
+                200
+            );
 
-        } catch (\Exception $e){
-
-            return ResponseHelper::jsonResponse(false, 'Data Kepala Keluarga Gagal Diambil', null, 500);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(
+                false, 
+                'Data Kepala Keluarga Gagal Diambil', 
+                null, 
+                500
+            );
         }
     }
 
@@ -93,19 +160,57 @@ class HeadOfFamilyController extends Controller implements HasMiddleware
     /**
      * Display the specified resource.
      */
+    // public function show(string $id)
+    // {
+    //     try{
+    //         $headOfFamily = $this->headOfFamilyRepository->getById($id, ['user', 'familyMembers']);
+    //         if(!$headOfFamily){
+    //             return ResponseHelper::jsonResponse(false, 'Kepala Keluarga tidak ditemukan', null, 404);
+    //         }
+
+    //         return ResponseHelper::jsonResponse(true, 'Detail Kepala Keluarga Berhasil diambil', new headOfFamilyResource($headOfFamily), 200);
+
+    //     } catch(\Exception $e){
+
+    //         return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+    //     }
+    // }
+
+    /**
+     * Display the specified resource.
+     * GET /api/head-of-families/{id}
+     */
     public function show(string $id)
     {
-        try{
-            $headOfFamily = $this->headOfFamilyRepository->getById($id);
-            if(!$headOfFamily){
-                return ResponseHelper::jsonResponse(false, 'Kepala Keluarga tidak ditemukan', null, 404);
+        try {
+            $headOfFamily = $this->headOfFamilyRepository->getById(
+                $id, 
+                ['user', 'familyMembers'] // Eager load relations
+            );
+
+            if (!$headOfFamily) {
+                return ResponseHelper::jsonResponse(
+                    false, 
+                    'Kepala Keluarga tidak ditemukan', 
+                    null, 
+                    404
+                );
             }
 
-            return ResponseHelper::jsonResponse(true, 'Detail Kepala Keluarga Berhasil diambil', new headOfFamilyResource($headOfFamily), 200);
+            return ResponseHelper::jsonResponse(
+                true, 
+                'Detail Kepala Keluarga Berhasil diambil', 
+                new HeadOfFamilyResource($headOfFamily), 
+                200
+            );
 
-        } catch(\Exception $e){
-
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(
+                false, 
+                $e->getMessage(), 
+                null, 
+                500
+            );
         }
     }
 

@@ -9,50 +9,101 @@ use Illuminate\Support\Facades\DB;
 
 class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
 {
+    // public function getAll(
+    //     ?string $search, 
+    //     ?int $limit, 
+    //     bool $execute
+    // ){
+    //     $query = HeadOfFamily::where (function ($query) use ($search){
+    //         // jika di parameternya ada keyword search maka akan melakukan query serch
+    //         if($search){
+    //             $query->search($search);
+    //         }
+    //     });
+
+    //     $query->orderBy('created_at', 'desc');
+    //         // mengambil data berdasarkan limit utk pagination 
+    //         if($limit){
+    //             $query->take($limit);
+    //         }
+
+    //         if($execute){
+    //             return $query->get();
+    //         }
+
+    //         // jika tidak tampilkan data dari query
+    //         return $query;
+    // }
+
+    // public function getAllPaginated(
+    //     ?string $search, 
+    //     ?int $rowPerPage
+    // ){
+    //     $query = $this->getAll(
+    //         $search,
+    //         $rowPerPage,
+    //         // false $execute agar tidak tampil semua datannya
+    //         false
+    //     );  
+    //     return $query->paginate($rowPerPage);
+    // }
+
+    // public function getById(string $id)
+    // {
+    //     $query = HeadOfFamily::where('id', $id);
+
+    //     return $query->first();
+    // }
+
     public function getAll(
-        ?string $search, 
-        ?int $limit, 
-        bool $execute
-    ){
-        $query = HeadOfFamily::where (function ($query) use ($search){
-            // jika di parameternya ada keyword search maka akan melakukan query serch
-            if($search){
-                $query->search($search);
-            }
-        });
+        ?string $search = null, 
+        ?int $limit = null,
+        array $with = [],
+        bool $execute = true
+    ) {
+        $query = HeadOfFamily::query();
 
+        // Eager load relations to prevent N+1
+        if (!empty($with)) {
+            $query->with($with);
+        }
+
+        // Apply search filter
+        if ($search) {
+            $query->search($search);
+        }
+
+        // Order by latest
         $query->orderBy('created_at', 'desc');
-            // mengambil data berdasarkan limit utk pagination 
-            if($limit){
-                $query->take($limit);
-            }
 
-            if($execute){
-                return $query->get();
-            }
+        // Apply limit if specified
+        if ($limit) {
+            $query->take($limit);
+        }
 
-            // jika tidak tampilkan data dari query
-            return $query;
+        return $execute ? $query->get() : $query;
     }
 
     public function getAllPaginated(
-        ?string $search, 
-        ?int $rowPerPage
-    ){
-        $query = $this->getAll(
-            $search,
-            $rowPerPage,
-            // false $execute agar tidak tampil semua datannya
-            false
-        );  
+        ?string $search = null,
+        int $rowPerPage = 15,
+        array $with = []
+    ) {
+        $query = $this->getAll($search, null, $with, false);
+        
         return $query->paginate($rowPerPage);
     }
 
-    public function getById(string $id)
+    public function getById(string $id, array $with = [])
     {
-        $query = HeadOfFamily::where('id', $id);
+        $query = HeadOfFamily::query();
 
-        return $query->first();
+        // Eager load relations if specified
+        if (!empty($with)) {
+            $query->with($with);
+        }
+
+        return $query->find($id);
     }
 
     public function create(
