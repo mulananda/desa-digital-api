@@ -8,6 +8,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventParticipantController;
 use App\Http\Controllers\FamilyMemberController;
 use App\Http\Controllers\HeadOfFamilyController;
+use App\Http\Controllers\PopulationStatisticController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialAssistanceController;
 use App\Http\Controllers\SocialAssistanceRecipientController;
@@ -18,6 +19,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum', 'csp')->group(function(){
 
     Route::get('dashboard/get-dashboard-data', [DashboardController::class, 'getDashboardData']);
+
+    Route::get('population/statistic', PopulationStatisticController::class);
+
 
     Route::apiResource('user', UserController::class);
     Route::get('user/all/paginated', [UserController::class, 'getAllPaginated']);
