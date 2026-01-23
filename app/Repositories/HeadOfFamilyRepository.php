@@ -68,6 +68,10 @@ class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
             $query->with($with);
         }
 
+        // TAMBAHAN: Load counts untuk mendapatkan total
+        $query->withCount([
+            'familyMembers'
+        ]);
         // Apply search filter
         if ($search) {
             $query->search($search);

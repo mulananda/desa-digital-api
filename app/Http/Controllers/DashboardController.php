@@ -26,4 +26,15 @@ class DashboardController extends Controller
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
+
+    public function getStatistic()
+    {
+        try {
+            $data = $this->dashboardRepository->getStatistic();
+
+            return ResponseHelper::jsonResponse(true, 'Success', $data, 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
 }

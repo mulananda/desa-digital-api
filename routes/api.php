@@ -18,10 +18,10 @@ use Illuminate\Support\Facades\Route;
 // Protected routes (requires authentication)
 Route::middleware('auth:sanctum', 'csp')->group(function(){
 
-    Route::get('dashboard/get-dashboard-data', [DashboardController::class, 'getDashboardData']);
-
-    Route::get('population/statistic', PopulationStatisticController::class);
-
+    Route::prefix('dashboard')->group(function(){
+        Route::get('/get-dashboard-data', [DashboardController::class, 'getDashboardData']);
+        Route::get('/get-statistic', [DashboardController::class, 'getStatistic']);
+    });
 
     Route::apiResource('user', UserController::class);
     Route::get('user/all/paginated', [UserController::class, 'getAllPaginated']);
