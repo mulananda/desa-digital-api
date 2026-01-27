@@ -9,52 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class HeadOfFamilyRepository implements HeadOfFamilyRepositoryInterface
 {
-    // public function getAll(
-    //     ?string $search, 
-    //     ?int $limit, 
-    //     bool $execute
-    // ){
-    //     $query = HeadOfFamily::where (function ($query) use ($search){
-    //         // jika di parameternya ada keyword search maka akan melakukan query serch
-    //         if($search){
-    //             $query->search($search);
-    //         }
-    //     });
-
-    //     $query->orderBy('created_at', 'desc');
-    //         // mengambil data berdasarkan limit utk pagination 
-    //         if($limit){
-    //             $query->take($limit);
-    //         }
-
-    //         if($execute){
-    //             return $query->get();
-    //         }
-
-    //         // jika tidak tampilkan data dari query
-    //         return $query;
-    // }
-
-    // public function getAllPaginated(
-    //     ?string $search, 
-    //     ?int $rowPerPage
-    // ){
-    //     $query = $this->getAll(
-    //         $search,
-    //         $rowPerPage,
-    //         // false $execute agar tidak tampil semua datannya
-    //         false
-    //     );  
-    //     return $query->paginate($rowPerPage);
-    // }
-
-    // public function getById(string $id)
-    // {
-    //     $query = HeadOfFamily::where('id', $id);
-
-    //     return $query->first();
-    // }
-
     public function getAll(
         ?string $search = null, 
         ?int $limit = null,

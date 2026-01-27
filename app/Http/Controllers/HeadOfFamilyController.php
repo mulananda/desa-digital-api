@@ -35,46 +35,6 @@ class HeadOfFamilyController extends Controller implements HasMiddleware
 
     /**
      * Display a listing of the resource.
-     */
-    // public function index(Request $request)
-    // {
-    //     try{
-    //         $headOfFamily = $this->headOfFamilyRepository->getAll(
-    //             $request->search,
-    //             $request->limit,
-    //             true
-    //         );
-
-    //         return ResponseHelper::jsonResponse(true, 'Data Kepala Keluarga Berhasil Diambil', HeadOfFamilyResource::collection($headOfFamily), 200);
-
-    //     } catch (\Exception $e){
-    //         return ResponseHelper::jsonResponse(false, 'Data Kepala Keluarga Gagal Diambil', null, 500);
-    //     }
-    // }
-
-    // public function getAllPaginated(Request $request)
-    // {
-    //     $request = $request->validate([
-    //         'search' => 'nullable|string',
-    //         'row_per_page' => 'required|integer'
-    //     ]);
-
-    //     try{
-    //         $headOfFamily = $this->headOfFamilyRepository->getAllPaginated(
-    //             $request['search'] ?? null,
-    //             $request['row_per_page']
-    //         );
-
-    //         return ResponseHelper::jsonResponse(true, 'Data Kepala Keluarga Berhasil Diambil', PaginateResource::make($headOfFamily, HeadOfFamilyResource::class), 200);
-
-    //     } catch (\Exception $e){
-
-    //         return ResponseHelper::jsonResponse(false, 'Data Kepala Keluarga Gagal Diambil', null, 500);
-    //     }
-    // }
-
-    /**
-     * Display a listing of the resource.
      * GET /api/head-of-families
      */
     public function index(Request $request)
@@ -156,25 +116,6 @@ class HeadOfFamilyController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    // public function show(string $id)
-    // {
-    //     try{
-    //         $headOfFamily = $this->headOfFamilyRepository->getById($id, ['user', 'familyMembers']);
-    //         if(!$headOfFamily){
-    //             return ResponseHelper::jsonResponse(false, 'Kepala Keluarga tidak ditemukan', null, 404);
-    //         }
-
-    //         return ResponseHelper::jsonResponse(true, 'Detail Kepala Keluarga Berhasil diambil', new headOfFamilyResource($headOfFamily), 200);
-
-    //     } catch(\Exception $e){
-
-    //         return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
-    //     }
-    // }
 
     /**
      * Display the specified resource.
