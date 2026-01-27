@@ -14,7 +14,6 @@ interface SocialAssistanceRepositoryInterface
     public function getAllPaginated(
         ?string $search = null,
         int $rowPerPage = 15,
-        array $with = []
     ); 
     
     public function getById(

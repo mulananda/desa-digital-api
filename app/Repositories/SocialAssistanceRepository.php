@@ -34,10 +34,10 @@ class SocialAssistanceRepository implements SocialAssistanceRepositoryInterface
         // Order by latest
         $query->orderBy('created_at', 'desc');
 
-        // Apply limit if specified
-        if ($limit) {
-            $query->take($limit);
+        if (!is_null($limit)) {
+            $query->limit($limit);
         }
+
 
         return $execute ? $query->get() : $query;
     }
@@ -46,6 +46,7 @@ class SocialAssistanceRepository implements SocialAssistanceRepositoryInterface
         int $rowPerPage = 15,
         array $with = []
     ) {
+        
         $query = $this->getAll($search, null, $with, false);
         
         return $query->paginate($rowPerPage);

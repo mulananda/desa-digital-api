@@ -40,9 +40,10 @@ class SocialAssistanceController extends Controller implements HasMiddleware
     {
          try{
             $socialAssistance = $this->socialAssistanceRepository->getAll(
-                $request->search,
-                $request->limit,
-                true
+                search: $request->search,
+                limit: $request->limit,
+                with: ['socialAssistanceRecipients'], // Eager load untuk prevent N+1
+                execute: true
             );
 
             return ResponseHelper::jsonResponse(true, 'Data Bantuan Sosial Berhasil Diambil', SocialAssistanceResource::collection($socialAssistance), 200);
@@ -54,15 +55,15 @@ class SocialAssistanceController extends Controller implements HasMiddleware
 
      public function getAllPaginated(Request $request)
     {
-        $request = $request->validate([
-            'search' => 'nullable|string',
-            'row_per_page' => 'required|integer'
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'row_per_page' => 'required|integer|min:1|max:100'
         ]);
 
         try{
             $socialAssistance = $this->socialAssistanceRepository->getAllPaginated(
-                $request['search'] ?? null,
-                $request['row_per_page']
+                search: $validated['search'] ?? null,
+                rowPerPage: $validated['row_per_page'],
             );
 
             return ResponseHelper::jsonResponse(true, 'Data Bantuan Sosial Berhasil Diambil', PaginateResource::make($socialAssistance, socialAssistanceResource::class), 200);
@@ -93,20 +94,39 @@ class SocialAssistanceController extends Controller implements HasMiddleware
 
     /**
      * Display the specified resource.
+     * GET /api/head-of-families/{id}
      */
     public function show(string $id)
     {
-        try{
-            $socialAssistance = $this->socialAssistanceRepository->getById($id);
+        try {
+            $socialAssistance = $this->socialAssistanceRepository->getById(
+                $id, 
+                ['socialAssistanceRecipients'] // Eager load relations
+            );
 
-             if(!$socialAssistance){
-                return ResponseHelper::jsonResponse(false, 'Data Bantuan Sosial tidak ditemukan', null, 404);
+            if (!$socialAssistance) {
+                return ResponseHelper::jsonResponse(
+                    false, 
+                    'Data Bantuan Sosial tidak ditemukan', 
+                    null, 
+                    404
+                );
             }
 
-             return ResponseHelper::jsonResponse(true, 'Data Bantuan Sosial berhasil Diambil', new socialAssistanceResource($socialAssistance), 200);
-        } catch (\Exception $e){
+            return ResponseHelper::jsonResponse(
+                true, 
+                'Detail Bantuan Sosial berhasil diambil', 
+                new socialAssistanceResource($socialAssistance), 
+                200
+            );
 
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(
+                false, 
+                $e->getMessage(), 
+                null, 
+                500
+            );
         }
     }
 

@@ -27,10 +27,13 @@ class SocialAssistance extends Model
 
     public function scopeSearch($query, ?string $search)
     {
-       return $query->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('provider', 'like', '%' . $search . '%')
-                    ->orWhere('amount', 'like', '%' . $search . '%');
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+            ->orWhere('provider', 'like', "%{$search}%")
+            ->orWhere('amount', 'like', "%{$search}%");
+        });
     }
+
 
 
     public function socialAssistanceRecipients()
