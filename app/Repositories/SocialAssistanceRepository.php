@@ -61,6 +61,11 @@ class SocialAssistanceRepository implements SocialAssistanceRepositoryInterface
             $query->with($with);
         }
 
+        // TAMBAHAN: Load counts untuk mendapatkan total
+        $query->withCount([
+            'socialAssistanceRecipients'
+        ]);
+
         return $query->find($id);
     }
 
