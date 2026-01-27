@@ -19,10 +19,10 @@ class HeadOfFamilyResource extends JsonResource
         // belongsTo = 'user' => new UserResource($this->user),
         return [
             'id' => $this->id,
-            // 'user' => new UserResource($this->user),
-            'user' => new UserResource(
-                $this->whenLoaded('user')
-            ),
+            'user' => new UserResource($this->user),
+            // 'user' => new UserResource(
+            //     $this->whenLoaded('user')
+            // ),
             'profile_picture' => asset('storage/'. $this->profile_picture),
             'identity_number' => $this->identity_number,
             'gender' => $this->gender,
