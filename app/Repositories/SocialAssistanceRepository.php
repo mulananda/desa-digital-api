@@ -9,43 +9,58 @@ use Illuminate\Support\Facades\DB;
 
 class SocialAssistanceRepository implements SocialAssistanceRepositoryInterface
 {
-    public function getAll(?string $search = null, ?int $limit = null, bool $execute = true)
-    {
-       // Mulai query Eloquent untuk model SocialAssistance
-        $query = SocialAssistance::query()
-            // Tambahkan kondisi search hanya jika parameter $search tidak null
-            // Fitur 'search()' biasanya berasal dari local scope: scopeSearch() di model
-            ->when($search, fn($q) => $q->search($search))
+     public function getAll(
+        ?string $search = null, 
+        ?int $limit = null,
+        array $with = [],
+        bool $execute = true
+    ) {
+        $query = SocialAssistance::query();
 
-            // Urutkan data berdasarkan created_at (desc)
-            // Sama dengan orderBy('created_at', 'desc')
-            ->latest();
-
-        // Jika limit diberikan dan nilainya lebih dari 0, batasi jumlah data
-        if (!is_null($limit) && $limit > 0) {
-            $query->limit($limit);
+        // Eager load relations to prevent N+1
+        if (!empty($with)) {
+            $query->with($with);
         }
 
-        // Jika execute = true, langsung eksekusi query dan ambil hasilnya
-        // Jika false, kembalikan objek Query Builder untuk fleksibilitas chaining
+        // TAMBAHAN: Load counts untuk mendapatkan total
+        $query->withCount([
+            'socialAssistanceRecipients'
+        ]);
+        // Apply search filter
+        if ($search) {
+            $query->search($search);
+        }
+
+        // Order by latest
+        $query->orderBy('created_at', 'desc');
+
+        // Apply limit if specified
+        if ($limit) {
+            $query->take($limit);
+        }
+
         return $execute ? $query->get() : $query;
     }
-
-    public function getAllPaginated(?string $search, ?int $rowPerPage)
-    {
-        $query = $this->getAll(
-            $search,
-            $rowPerPage,
-            false
-        );  
+    public function getAllPaginated(
+        ?string $search = null,
+        int $rowPerPage = 15,
+        array $with = []
+    ) {
+        $query = $this->getAll($search, null, $with, false);
+        
         return $query->paginate($rowPerPage);
     }
 
-    public function getById(string $id)
+    public function getById(string $id, array $with = [])
     {
-        $query = SocialAssistance::where('id', $id);
+        $query = SocialAssistance::query();
 
-        return $query->first();
+        // Eager load relations if specified
+        if (!empty($with)) {
+            $query->with($with);
+        }
+
+        return $query->find($id);
     }
 
     public function create(array $data)
