@@ -32,7 +32,7 @@ class HeadOfFamilyResource extends JsonResource
             'marital_status' => $this->marital_status,
             // 'family_members' => FamilyMemberResource::collection($this->familyMembers)
             'family_members' => FamilyMemberResource::collection($this->whenLoaded('familyMembers')),
-            // COUNTS - ini yang penting!
+            // COUNTS - relasi function familyMembers
             'family_members_count' => $this->whenCounted('familyMembers'),
         ];
     }
