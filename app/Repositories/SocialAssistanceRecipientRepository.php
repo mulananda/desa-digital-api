@@ -32,14 +32,14 @@ class SocialAssistanceRecipientRepository implements SocialAssistanceRecipientRe
         return $execute ? $query->get() : $query;
     }
     
-    public function getAllPaginated(?string $search, ?int $rowPerPage)
+    public function getAllPaginated(?string $search, ?int $PerPage)
     {
         $query = $this->getAll(
             $search,
-            $rowPerPage,
+            $PerPage,
             false
         );  
-        return $query->paginate($rowPerPage);
+        return $query->paginate($PerPage);
     }
 
     public function getById(string $id)

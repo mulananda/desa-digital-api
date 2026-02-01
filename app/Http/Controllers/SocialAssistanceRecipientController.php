@@ -57,13 +57,13 @@ class SocialAssistanceRecipientController extends Controller implements HasMiddl
     {
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer'
+            'per_page' => 'required|integer'
         ]);
 
         try{
             $socialAssistanceRecipients = $this->socialAssistanceRecipientRepository->getAllPaginated(
                 $request['search'] ?? null,
-                $request['row_per_page']
+                $request['per_page']
             );
 
             return ResponseHelper::jsonResponse(true, 'Data Penerima Bantuan Sosial Berhasil Diambil', PaginateResource::make($socialAssistanceRecipients, socialAssistanceRecipientResource::class), 200);
