@@ -10,43 +10,70 @@ use Illuminate\Support\Facades\DB;
 class SocialAssistanceRecipientRepository implements SocialAssistanceRecipientRepositoryInterface
 {
     
-    public function getAll(?string $search = null, ?int $limit = null, bool $execute = true)
+    public function getAll(
+        ?string $search = null, 
+        ?int $limit = null,
+        array $with = [],
+        bool $execute = true)
     {
        // Mulai query Eloquent untuk model SocialAssistance
-        $query = SocialAssistanceRecipient::query()
-            // Tambahkan kondisi search hanya jika parameter $search tidak null
-            // Fitur 'search()' biasanya berasal dari local scope: scopeSearch() di model
-            ->when($search, fn($q) => $q->search($search))
+        $query = SocialAssistanceRecipient::query();
+        
+        // Eager load relations to prevent N+1
+        if (!empty($with)) {
+            $query->with($with);
+        }
 
-            // Urutkan data berdasarkan created_at (desc)
-            // Sama dengan orderBy('created_at', 'desc')
-            ->latest();
+        // Apply search filter
+        if ($search) {
+            $query->search($search);
+        }
 
-        // Jika limit diberikan dan nilainya lebih dari 0, batasi jumlah data
-        if (!is_null($limit) && $limit > 0) {
+        // Order by latest
+        $query->orderBy('created_at', 'desc');
+
+        if (!is_null($limit)) {
             $query->limit($limit);
         }
 
-        // Jika execute = true, langsung eksekusi query dan ambil hasilnya
-        // Jika false, kembalikan objek Query Builder untuk fleksibilitas chaining
+
         return $execute ? $query->get() : $query;
     }
     
-    public function getAllPaginated(?string $search, ?int $PerPage)
-    {
-        $query = $this->getAll(
-            $search,
-            $PerPage,
-            false
-        );  
-        return $query->paginate($PerPage);
+    public function getAllPaginated(
+        ?string $search = null,
+        int $perPage = 10,
+        array $with = []
+    ) {
+        
+        $query = $this->getAll($search, null, $with, false);
+
+         // Eager load relations to prevent N+1
+        if (!empty($with)) {
+            $query->with($with);
+        }
+        
+        return $query->paginate($perPage);
     }
 
-    public function getById(string $id)
+    public function getById(string $id, array $with = [], array $withCount = [])
     {
-        $query = SocialAssistanceRecipient::where('id', $id);
+        $query = SocialAssistanceRecipient::query();
 
-        return $query->first();
+         // Eager load relations if specified
+        if (!empty($with)) {
+            $query->with($with);
+        }
+
+        // count dengan nested relasi
+        foreach ($withCount as $relation => $countRelation) {
+            $query->with([
+                $relation => fn ($q) => $q->withCount($countRelation)
+            ]);
+        }
+        
+
+        return $query->find($id);
     }
 
     public function create(array $data)
@@ -120,7 +147,7 @@ class SocialAssistanceRecipientRepository implements SocialAssistanceRecipientRe
         DB::beginTransaction();
 
         try{
-            $socialAssistanceRecipient = SocialAssistanceRecipient::find($id);
+            $socialAssistanceRecipient = SocialAssistanceRecipient::findOrFail($id);
             $socialAssistanceRecipient->delete();
 
             DB::commit();

@@ -5,22 +5,26 @@ namespace App\Interfaces;
 interface SocialAssistanceRecipientRepositoryInterface
 {
     public function getAll(
-        ?string $search,
-        ?int $limit,
-        bool $execute
+        ?string $search = null, 
+        ?int $limit = null,
+        array $with = [],
+        bool $execute = true
     );
 
     public function getAllPaginated(
-        ?string $search,
-        ?int $PerPage
+        ?string $search = null,
+        int $perPage = 10,
+        array $with = [],
+    ); 
+    
+    public function getById(
+        string $id,
+        array $with = [],
+        array $withCount = []
     );
 
     public function create(
         array $data
-    );
-
-    public function getById(
-        string $id
     );
 
     public function update(

@@ -19,10 +19,11 @@ class HeadOfFamilyResource extends JsonResource
         // belongsTo = 'user' => new UserResource($this->user),
         return [
             'id' => $this->id,
-            'user' => new UserResource($this->user),
-            // 'user' => new UserResource(
-            //     $this->whenLoaded('user')
-            // ),
+            // 'user' => new UserResource($this->user),
+            'user' => UserResource::make(
+                $this->whenLoaded('user')
+            ),
+
             'profile_picture' => asset('storage/'. $this->profile_picture),
             'identity_number' => $this->identity_number,
             'gender' => $this->gender,
@@ -32,8 +33,10 @@ class HeadOfFamilyResource extends JsonResource
             'marital_status' => $this->marital_status,
             // 'family_members' => FamilyMemberResource::collection($this->familyMembers)
             'family_members' => FamilyMemberResource::collection($this->whenLoaded('familyMembers')),
-            // COUNTS - relasi function familyMembers
+            // // COUNTS - relasi function familyMembers
             'family_members_count' => $this->whenCounted('familyMembers'),
+            // Counts jika pemanggilan secara nested
+            // 'family_members_count' => $this->family_members_count,
         ];
     }
 }

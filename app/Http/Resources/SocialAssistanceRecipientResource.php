@@ -19,8 +19,15 @@ class SocialAssistanceRecipientResource extends JsonResource
 
         return[
             'id' => $this->id,
-            'social_assistance_id' => new SocialAssistanceResource($this->socialAssistance),
-            'head_of_family_id' => new HeadOfFamilyResource($this->headOfFamily),
+            // make() jika dimodel
+            // SINGLE belongsTo, hasOne
+            'social_assistance' => SocialAssistanceResource::make(
+                $this->whenLoaded('socialAssistance')
+            ),
+            // 'head_of_family' => new HeadOfFamilyResource($this->headOfFamily),
+            'head_of_family' => HeadOfFamilyResource::make(
+                $this->whenLoaded('headOfFamily')
+            ),
             'amount' => $this->amount,
             'reason' => $this->reason,
             'bank' => $this->bank,
