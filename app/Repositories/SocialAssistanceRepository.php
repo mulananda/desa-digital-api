@@ -22,10 +22,6 @@ class SocialAssistanceRepository implements SocialAssistanceRepositoryInterface
             $query->with($with);
         }
 
-        // TAMBAHAN: Load counts untuk mendapatkan total
-        $query->withCount([
-            'socialAssistanceRecipients'
-        ]);
         // Apply search filter
         if ($search) {
             $query->search($search);
@@ -44,15 +40,26 @@ class SocialAssistanceRepository implements SocialAssistanceRepositoryInterface
     public function getAllPaginated(
         ?string $search = null,
         int $rowPerPage = 15,
-        array $with = []
+        array $with = [],
+        array $withCount = []
     ) {
         
         $query = $this->getAll($search, null, $with, false);
+
+         // Eager load relations to prevent N+1
+        if (!empty($with)) {
+            $query->with($with);
+        }
+
+        // TAMBAHAN: Load counts untuk mendapatkan total
+         if (!empty($withCount)) {
+            $query->withCount($withCount);
+        }
         
         return $query->paginate($rowPerPage);
     }
 
-    public function getById(string $id, array $with = [])
+    public function getById(string $id, array $with = [], array $withCount= [])
     {
         $query = SocialAssistance::query();
 
@@ -62,9 +69,11 @@ class SocialAssistanceRepository implements SocialAssistanceRepositoryInterface
         }
 
         // TAMBAHAN: Load counts untuk mendapatkan total
-        $query->withCount([
-            'socialAssistanceRecipients'
-        ]);
+        if (!empty($withCount)) {
+            $query->withCount($withCount);
+        }
+
+        
 
         return $query->find($id);
     }

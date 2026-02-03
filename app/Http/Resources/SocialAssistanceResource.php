@@ -23,8 +23,13 @@ class SocialAssistanceResource extends JsonResource
             'provider' => $this->provider,
             'description' => $this->description,
             'is_available' => $this->is_available,
+            // collection() jika dimodel
+            // MULTIPLE hasMany, belongsToMany
             'social_assistance_recipients' => SocialAssistanceRecipientResource::collection($this->whenLoaded('socialAssistanceRecipients')),
-            'social_assistance_recipients_count' => $this->whenCounted('socialAssistanceRecipients')
+
+            'social_assistance_recipients_count' => $this->whenCounted('socialAssistanceRecipients'),
+            // Counts jika pemanggilan secara nested
+            // 'social_assistance_recipients_count' => $this->social_assistance_recipients_count,
         ];
     }
 }

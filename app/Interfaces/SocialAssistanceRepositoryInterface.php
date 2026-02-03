@@ -14,11 +14,14 @@ interface SocialAssistanceRepositoryInterface
     public function getAllPaginated(
         ?string $search = null,
         int $rowPerPage = 15,
+        array $with = [],
+        array $withCount = []
     ); 
     
     public function getById(
         string $id,
-        array $with = []
+        array $with = [],
+        array $withCount = []
     );
 
     public function create(

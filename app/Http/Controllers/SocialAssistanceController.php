@@ -42,7 +42,7 @@ class SocialAssistanceController extends Controller implements HasMiddleware
             $socialAssistance = $this->socialAssistanceRepository->getAll(
                 search: $request->search,
                 limit: $request->limit,
-                with: ['socialAssistanceRecipients'], // Eager load untuk prevent N+1
+                // with: ['socialAssistanceRecipients'],
                 execute: true
             );
 
@@ -64,9 +64,10 @@ class SocialAssistanceController extends Controller implements HasMiddleware
             $socialAssistance = $this->socialAssistanceRepository->getAllPaginated(
                 search: $validated['search'] ?? null,
                 rowPerPage: $validated['row_per_page'],
+                withCount:['socialAssistanceRecipients'], // Eager load relations
             );
 
-            return ResponseHelper::jsonResponse(true, 'Data Bantuan Sosial Berhasil Diambil', PaginateResource::make($socialAssistance, socialAssistanceResource::class), 200);
+            return ResponseHelper::jsonResponse(true, 'Data Bantuan Sosial Berhasil Diambil', PaginateResource::make($socialAssistance, SocialAssistanceResource::class), 200);
 
         } catch (\Exception $e){
 
@@ -84,7 +85,7 @@ class SocialAssistanceController extends Controller implements HasMiddleware
         try{
             $socialAssistance = $this->socialAssistanceRepository->create($request);
 
-            return ResponseHelper::jsonResponse(true, 'Data Bantuan Sosial berhasil ditambahkan', new socialAssistanceResource($socialAssistance), 201);
+            return ResponseHelper::jsonResponse(true, 'Data Bantuan Sosial berhasil ditambahkan', new SocialAssistanceResource($socialAssistance), 201);
 
         } catch(\Exception $e){
 
@@ -101,7 +102,8 @@ class SocialAssistanceController extends Controller implements HasMiddleware
         try {
             $socialAssistance = $this->socialAssistanceRepository->getById(
                 $id, 
-                ['socialAssistanceRecipients'] // Eager load relations
+                with: ['socialAssistanceRecipients.headOfFamily.user'], //jika ada pengambilan relasi dari resource sosialAssistance
+                withCount:['socialAssistanceRecipients'] // Eager load relations count
             );
 
             if (!$socialAssistance) {
@@ -116,7 +118,7 @@ class SocialAssistanceController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(
                 true, 
                 'Detail Bantuan Sosial berhasil diambil', 
-                new socialAssistanceResource($socialAssistance), 
+                new SocialAssistanceResource($socialAssistance), 
                 200
             );
 
@@ -148,7 +150,7 @@ class SocialAssistanceController extends Controller implements HasMiddleware
                 $id,
                 $request
             );
-            return ResponseHelper::jsonResponse(true, 'Data Bantuan Sosial berhasil Diupdate', new socialAssistanceResource($socialAssistance), 200);
+            return ResponseHelper::jsonResponse(true, 'Data Bantuan Sosial berhasil Diupdate', new SocialAssistanceResource($socialAssistance), 200);
 
         } catch (\Exception $e){
              return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
